@@ -146,12 +146,21 @@ class SSHMonitorGraph(QWidget):
 
             for p in processes:
                 cmd = p.get("COMMAND", "")
-                # Burası site/process adını kısaltmak için örnek, kendi sunucuya göre uyarlayabilirsin
-                site = cmd.split()[0] if cmd else "unknown"
                 cpu = float(p.get("%CPU", "0"))
                 mem = float(p.get("%MEM", "0"))
+            
+                if "php-fpm: pool" in cmd:
+                    # Site adını ayıkla (örnek: 'php-fpm: pool www_example_com')
+                    try:
+                        site = cmd.split("php-fpm: pool")[1].strip()
+                    except IndexError:
+                        site = "php-fpm"
+                else:
+                    site = "Diğer"
+            
                 cpu_usage[site] += cpu
                 ram_usage[site] += mem
+
 
             # En çok kullanılan 10 siteyi al
             top_cpu = sorted(cpu_usage.items(), key=lambda x: x[1], reverse=True)[:10]
